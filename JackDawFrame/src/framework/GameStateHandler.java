@@ -13,7 +13,7 @@ public class GameStateHandler {
 
 	public GameStateHandler() {
 		
-		states = new GameState[20];
+		states = new GameState[totalGameStates()];
 		
 		//fail safe
 		currentGameState = 0;
@@ -33,9 +33,10 @@ public class GameStateHandler {
 		states[currentGameState].update();
 	}
 
-	/**sets previous state to null and gets a new instance for the given game state index
-	 * 
-	 * @param state : the index fo the gamestate to be loaded*/
+	/**
+	 * sets previous state to null and gets a new instance for the given game state index
+	 * @param state : the index fo the gamestate to be loaded
+	 * */
 	public void changeGameState(int state) {
 		MouseHandler.clicked = null;
 		
