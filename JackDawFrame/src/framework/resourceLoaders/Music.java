@@ -12,45 +12,56 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 public class Music {
 
-	private static HashMap<String, Clip> clips;
-	private static int gap;
+	private static HashMap<String, Clip> clips = new HashMap<String, Clip>();
+	private static int gap = 0;
 	private static boolean mute = false;
 
-	public static void close(String s) {
-		stop(s);
-		clips.get(s).close();
+	/**stops sound for given sound 
+	 * @param s : name of the sound to end */
+	public static void close(String soundName) {
+		stop(soundName);
+		clips.get(soundName).close();
 	}
 
-	public static int getFrames(String s) {
-		return clips.get(s).getFrameLength();
+	/**
+	 * @return returns the frame length : a.k.a total length of the clip 
+	 */
+	public static int getFrameLength(String soundName) {
+		return clips.get(soundName).getFrameLength();
 	}
 
+	/**loops trough all registered sounds and stops them
+	 * calls : {@link Clip}.stop();
+	 * and 
+	 * {@link Clip}.close();
+	 */
 	public static void stopAll(){
-		for(Clip c : clips.values())
+		for(Clip c : clips.values()){
 			c.stop();
+			c.close();
+		}
 	}
 
-	public static int getPosition(String s) {
-		return clips.get(s).getFramePosition();
+	public static int getPosition(String soundName) {
+		return clips.get(soundName).getFramePosition();
 	}
 
-	public static void init() {
-		clips = new HashMap<String, Clip>();
-		gap = 0;
-	}
-
-	public static Clip getClip(String s)
+	/**
+	 * @return returns {@link Clip} for given (registered) String.
+	 * If the string is not recognized, will return null;
+	 */
+	public static Clip getClip(String soundName)
 	{
 		Clip c = null;
-		if(clips.containsKey(s))
-			c = clips.get(s);
+		if(clips.containsKey(soundName))
+			c = clips.get(soundName);
 		return c;
 	}
 
-	public static float getFrameRate(String s){
+	public static float getFrameRate(String soundName){
 		Clip c = null;
-		if(clips.containsKey(s))
-			c = clips.get(s);
+		if(clips.containsKey(soundName))
+			c = clips.get(soundName);
 
 		float rate = 1f;
 		if(c != null)
@@ -61,12 +72,18 @@ public class Music {
 
 		return rate;
 	}
-
-	public static void load(String s, String n) {
+	
+	/**
+	 * Adds the sound from 'path' to a {@link HashMap} under the key for 'name'
+	 * 
+	 * @param path : given path for sound file (.mp3)
+	 * @param name : registers the sound to this name
+	 */
+	public static void load(String path, String name) {
 		
-		System.out.println(s + " " + n);
+		System.out.println(path + " " + name);
 		
-		if (clips.get(n) != null)
+		if (clips.get(name) != null)
 			return;
 		
 		Clip clip;
@@ -74,7 +91,7 @@ public class Music {
 		AudioInputStream ais;
 		
 		try {
-			ais = AudioSystem.getAudioInputStream(Music.class.getResourceAsStream(s));
+			ais = AudioSystem.getAudioInputStream(Music.class.getResourceAsStream(path));
 			final AudioFormat baseFormat = ais.getFormat();
 			final AudioFormat decodeFormat = new AudioFormat(
 					AudioFormat.Encoding.PCM_SIGNED,
@@ -86,7 +103,7 @@ public class Music {
 			clip = AudioSystem.getClip();
 			clip.open(dais);
 			
-			clips.put(n, clip);
+			clips.put(name, clip);
 			
 		} catch (UnsupportedAudioFileException e) {
 			e.printStackTrace();
@@ -97,121 +114,74 @@ public class Music {
 		}
 	}
 
-//	public static void oldload(String s, String n) {
-//
-//		System.out.println(s + " " + n);
-//
-//		if (clips.get(n) != null)
-//			return;
-//
-//		Clip clip = null;
-//		AudioInputStream ais = null;
-//		InputStream is = null;
-//
-//		try {
-//			is = Music.class.getClass().getResourceAsStream(s);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//
-//		if(is == null){
-//			System.out.println(s + " is not a valid directory or file !");
-//			System.out.println("skipping file for name " + n);
-//			return;
-//		}
-//
-//		try {
-//			ais = AudioSystem.getAudioInputStream(is);
-//		} catch (UnsupportedAudioFileException | IOException e1) {
-//			e1.printStackTrace();
-//		}
-//
-//		final AudioFormat baseFormat = ais.getFormat();
-//		final AudioFormat decodeFormat = new AudioFormat(
-//				AudioFormat.Encoding.PCM_SIGNED,
-//				baseFormat.getSampleRate(), 16, baseFormat.getChannels(),
-//				baseFormat.getChannels() * 2, baseFormat.getSampleRate(),
-//				false);
-//		final AudioInputStream dais = AudioSystem.getAudioInputStream(
-//				decodeFormat, ais);
-//		try {
-//			clip = AudioSystem.getClip();
-//		} catch (LineUnavailableException e) {
-//			e.printStackTrace();
-//		}
-//
-//
-//		try {
-//			clip.open(dais);
-//		} catch (LineUnavailableException e) {
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}finally{
-//			if(clip != null)
-//				clips.put(n, clip);
-//		}
-//	}
-
-	public static void loop(String s) {
-		loop(s, gap, gap, clips.get(s).getFrameLength() - 1);
+	public static void loop(String soundName) {
+		loop(soundName, gap, gap, clips.get(soundName).getFrameLength() - 1);
 	}
 
-	public static void loop(String s, int frame) {
-		loop(s, frame, gap, clips.get(s).getFrameLength() - 1);
+	public static void loop(String soundName, int frame) {
+		loop(soundName, frame, gap, clips.get(soundName).getFrameLength() - 1);
 	}
 
-	public static void loop(String s, int start, int end) {
-		loop(s, gap, start, end);
+	public static void loop(String soundName, int start, int end) {
+		loop(soundName, gap, start, end);
 	}
 
-	public static void loop(String s, int frame, int start, int end) {
-		stop(s);
+	public static void loop(String soundName, int frame, int start, int end) {
+		stop(soundName);
 		if (mute)
 			return;
-		clips.get(s).setLoopPoints(start, end);
-		clips.get(s).setFramePosition(frame);
-		clips.get(s).loop(Clip.LOOP_CONTINUOUSLY);
+		clips.get(soundName).setLoopPoints(start, end);
+		clips.get(soundName).setFramePosition(frame);
+		clips.get(soundName).loop(Clip.LOOP_CONTINUOUSLY);
 	}
 
-	public static void play(final String s){
+	/**
+	 * Calls a new thread to play the sound on to prevent concurrent sounds
+	 * @param soundName : registered name of the wanted sound to play
+	 */
+	public static void play(final String soundName){
 		new Thread(
 				new Runnable() {
 					@Override
 					public void run() {
-						playMusic(s);	
+						playMusic(soundName);	
 					}
 				}).start();
 	}
 
-	public static void play(final String s, final int gap){
+	/**
+	 * Calls a new thread to play the sound, with gap, on to prevent concurrent sounds
+	 * @param soundName : registered name of the wanted sound to play
+	 * @param gap : length of gap
+	 */
+	public static void play(final String soundName, final int gap){
 		new Thread(
 				new Runnable() {
 					@Override
 					public void run() {
-						playMusic(s, gap);	
+						playMusic(soundName, gap);	
 					}
 				}).start();
 	}
 
-	private static void playMusic(String s) {
-		if(!clips.containsKey(s)){
-			System.out.println("the key " + s + " for sounds does not exist");
+	private static void playMusic(String soundName) {
+		if(!clips.containsKey(soundName)){
+			System.out.println("the key " + soundName + " for sounds does not exist");
 			return;
 		}
 
 		try {
-			play(s, gap);
+			play(soundName, gap);
 		} catch (Exception e) {
 			System.out.println("An error occured playing a sound file !");
 			e.printStackTrace();
 		}
 	}
 
-	private static void playMusic(String s, int i) {
+	private static void playMusic(String soundName, int framePosition) {
 
-		if(!clips.containsKey(s)){
-			System.out.println("the key " + s + " for sounds does not exist");
+		if(!clips.containsKey(soundName)){
+			System.out.println("the key " + soundName + " for sounds does not exist");
 			return;
 		}
 
@@ -220,7 +190,7 @@ public class Music {
 			if (mute)
 				return;
 
-			final Clip c = clips.get(s);
+			final Clip c = clips.get(soundName);
 
 			if (c == null)
 				return;
@@ -228,7 +198,7 @@ public class Music {
 			if (c.isRunning())
 				c.stop();
 
-			c.setFramePosition(i);
+			c.setFramePosition(framePosition);
 
 			while (!c.isRunning())
 				c.start();
@@ -239,23 +209,23 @@ public class Music {
 		}
 	}
 
-	public static void resume(String s) {
+	public static void resume(String soundName) {
 		if (mute)
 			return;
-		if (clips.get(s).isRunning())
+		if (clips.get(soundName).isRunning())
 			return;
-		clips.get(s).start();
+		clips.get(soundName).start();
 	}
 
-	public static void setPosition(String s, int frame) {
-		clips.get(s).setFramePosition(frame);
+	public static void setPosition(String soundName, int frame) {
+		clips.get(soundName).setFramePosition(frame);
 	}
 
-	public static void stop(String s) {
-		if (clips.get(s) == null)
+	public static void stop(String soundName) {
+		if (clips.get(soundName) == null)
 			return;
-		if (clips.get(s).isRunning())
-			clips.get(s).stop();
+		if (clips.get(soundName).isRunning())
+			clips.get(soundName).stop();
 	}
 
 	/**toggles mute on or off*/
