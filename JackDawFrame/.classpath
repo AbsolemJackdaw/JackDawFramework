@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="D:/Java Programs HomeMade/IAmJack/TodayIAmJackaboy/libs/json-stleary.jar"/>
 	<classpathentry kind="lib" path="D:/Java Programs HomeMade/IAmJack/TodayIAmJackaboy/libs/mp3spi1.9.5.jar"/>
 	<classpathentry kind="lib" path="D:/Java Programs HomeMade/IAmJack/TodayIAmJackaboy/libs/tritonus_share.jar"/>
+	<classpathentry kind="lib" path="D:/Java Programs HomeMade/JackDawFramework.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
