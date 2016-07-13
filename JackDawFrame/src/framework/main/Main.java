@@ -13,7 +13,12 @@ public class Main{
 
 	public static void main(String[] args) {
 		
-		boolean fullScreen = Boolean.getBoolean(args[0]);
+		String flagString = args[0];
+		boolean flag = Boolean.parseBoolean(flagString);
+		System.out.println("fullscreen flag is " + flag);
+
+		boolean fullScreen = flag;
+		
 		mousePath = args[3];
 		
 		new Window(fullScreen);
