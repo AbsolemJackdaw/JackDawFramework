@@ -51,11 +51,11 @@ public class Button {
 		int h = g.getFontMetrics().getHeight();
 		int w = g.getFontMetrics().stringWidth(name);
 
-		g.drawImage(isLit ? getButtonImageLit() : getButtonImage() , (int)posX- Window.getGameScale(sizeX/2), (int)posY, Window.getGameScale(128), Window.getGameScale(128), null);
+		g.drawImage(isLit ? getButtonImageLit() : getButtonImage() , (int)posX- Window.getGameScale(sizeX/2), (int)posY, Window.getGameScale(getButtonImage().getWidth()*4), Window.getGameScale(getButtonImage().getHeight()*4), null);
 
 		g.drawString(name, 
 				((int)posX - Window.getGameScale(sizeX/2)) - w/2 + Window.getGameScale(sizeX/2),
-				(int)posY + h + Window.getGameScale(sizeY/2) );
+				(int)posY + h + Window.getGameScale(sizeY/2 + 2) );
 
 	}
 
