@@ -28,6 +28,10 @@ suggestion : make a package called mygame.framehook or mygame.main in which you 
       3.If you need to load in resources, I advice you to make a gamestate that extends LoadState,
       whicha has a nifty 'loadResources()' method in which you can load any resources needed, while still being able
       to draw to the screen and make something fancy out of the loading.
+      
+to launch the game add these 4 strings to your program arguments :
+"boolean : true for fullscreen" "mygamename" "mypackages.path.to.myPersonalGamepanel" "image path for mousecursor if wanted. blank if not desired"
+
 
 External libraries Required : 
 #sound decoding
