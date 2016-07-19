@@ -19,8 +19,11 @@ suggestion : make a package called mygame.framehook or mygame.main in which you 
 - if you'd like, a class extending GameState, to personalize the game and update methods
 
 -side note on gamestates :
+
       1.You cannot register a GameState with identifier -128. it already exists.
+      
       2.The gamestate with identifier 0 will be loaded first. if no gamestate with identifier 0 exists, running the game will result in crash and a nullpointer exception
+      
       3.If you need to load in resources, I advice you to make a gamestate that extends LoadState,
       whicha has a nifty 'loadResources()' method in which you can load any resources needed, while still being able
       to draw to the screen and make something fancy out of the loading.
