@@ -8,11 +8,11 @@ warning : very simple frame
 improvements will always be made
 Check bottom for other requiered libraries
 
-HOW TO : 
+#HOW TO : 
 suggestion : make a package called mygame.framehook or mygame.main in which you will put the following :
 
 - a Class that has the main method in it, calling the main from the framework (framework.main.Main.main(args);)
-- a Class extending GameStateHandler in which you will call 'addGameState(GameState, int)'
+- a Class extending GameStateHandler in which you will call 'addGameState(GameState, int)' in it's constructor
        for every GameState you will create.
 - a Class extending GamePanel, in which you will override 
        getCustomGameStateHandler() and return your own GameStateHandler
