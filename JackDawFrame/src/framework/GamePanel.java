@@ -107,9 +107,9 @@ public class GamePanel extends JFXPanel implements Runnable{
 		ghs = getCustomGameStateHandler();
 	}
 	
-	/**this needs to be absolutely overridden and given your class that extends Gamestatehandler*/
+	/**this needs to be absolutely overridden and given your class that extends {@link GameStateHandler}*/
 	public GameStateHandler getCustomGameStateHandler(){
-		return null;
+		return new GameStateHandler();
 	}
 
 	private void runGameLoop() {

@@ -38,7 +38,6 @@ public class Music {
 	public static void stopAll(){
 		for(Clip c : clips.values()){
 			c.stop();
-			c.close();
 		}
 	}
 

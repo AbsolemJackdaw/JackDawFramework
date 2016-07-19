@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
+import framework.gamestate.GameStateIntro;
 import framework.input.MouseHandler;
 
 public class GameStateHandler {
@@ -21,6 +22,8 @@ public class GameStateHandler {
 		//		states = new GameState[totalGameStates()];
 		thestates = new HashMap<Integer, Class<? extends GameState>>();
 
+		addGameState(GameStateIntro.class, -128);
+		changeGameState(-128);
 	}
 
 	/**@return returns the index of the current loaded gamestate*/
