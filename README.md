@@ -30,7 +30,7 @@ suggestion : make a package called mygame.framehook or mygame.main in which you 
       to draw to the screen and make something fancy out of the loading.
       
 to launch the game add these 4 strings to your program arguments :
-"boolean : true for fullscreen" "mygamename" <mypackages.path.to.myPersonalGamepanel> "image path for mousecursor if wanted. blank if not desired"
+"boolean : true for fullscreen" "mygamename" ""mypackages.path.to.myPersonalGamepanel"" "image path for mousecursor if wanted. blank if not desired"
 
 
 External libraries Required : 
