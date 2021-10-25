@@ -22,8 +22,8 @@ public class MouseHandler extends MouseAdapter implements MouseWheelListener {
 	public static int wheelY = 0;
 
 	public static void update(){
-		double x = GamePanel.instance.getLocationOnScreen().getX();
-		double y = GamePanel.instance.getLocationOnScreen().getY();
+		double x = GamePanel.INSTANCE.getLocationOnScreen().getX();
+		double y = GamePanel.INSTANCE.getLocationOnScreen().getY();
 
 		double xm = MouseInfo.getPointerInfo().getLocation().getX();
 		double ym = MouseInfo.getPointerInfo().getLocation().getY();

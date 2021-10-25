@@ -3,6 +3,7 @@ package framework.gamestate;
 import framework.GameState;
 import framework.GameStateHandler;
 import framework.resourceLoaders.ImageLoader;
+import framework.resourceLoaders.ResourceLocation;
 import framework.window.Window;
 
 import java.awt.*;
@@ -13,19 +14,14 @@ public class GameStateIntro extends GameState {
     private BufferedImage logo = null;
     private int tickTimerCounter = 60 * 5;
     private float alpha = 1f;
-    private float step = 1f / (60f * 2f);
 
     public GameStateIntro(GameStateHandler gsh) {
         super(gsh);
-
-		logo = ImageLoader.loadSprite("/logo.png");
-
+        logo = ImageLoader.loadSprite(new ResourceLocation("/logo.png"));
     }
 
     @Override
     public void draw(Graphics2D g) {
-        super.draw(g);
-
         g.drawImage(logo,
                 (Window.getWidth() / 4) * 2 - Window.getGameScale(64),
                 (Window.getHeight() / 4) * 2 - Window.getGameScale(64),
@@ -39,7 +35,7 @@ public class GameStateIntro extends GameState {
 
         g.drawString("JackDaw",
                 Window.getWidth() / 2 - g.getFontMetrics().stringWidth("JackDaw") / 2,
-                (Window.getHeight() / 4) * 1 + g.getFontMetrics().getHeight() / 2);
+                (Window.getHeight() / 4) + g.getFontMetrics().getHeight() / 2);
 
         g.drawString("FrameWork",
                 Window.getWidth() / 2 - g.getFontMetrics().stringWidth("FrameWork") / 2,
@@ -52,10 +48,10 @@ public class GameStateIntro extends GameState {
 
     @Override
     public void update() {
-        super.update();
 
         tickTimerCounter--;
 
+        float step = 1f / (60f * 2f);
         if (tickTimerCounter < 60 * 2) {
             alpha += step;
         } else if (tickTimerCounter > 60 * 3) {
@@ -68,7 +64,7 @@ public class GameStateIntro extends GameState {
             alpha = 0f;
 
         if (tickTimerCounter <= 0) {
-            gsh.changeGameState(0);
+            gsh.changeGameState(GameState.FIRST_SCREEN);
         }
     }
 }

@@ -1,40 +1,25 @@
 package framework.main;
 
-import java.awt.Container;
+import framework.GamePanel;
+
+import java.awt.*;
 
 public class ContainerInstantator {
 
-	/**
-	 * Instantiates the gamepanel that needs to be used
-	 * */
-	public static Container getContainerClassFor(String path){
+    /**
+     * Instantiates the gamepanel that needs to be used
+     */
+    public static Container getContainerClassFor(String path) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 
-		//get the gamepanel container class from class path
-		Class<?> cl = null; 
-		try {
-			cl = Class.forName(path);
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
+        if (path == null || path.isEmpty())
+            throw new NullPointerException("game panel argument in launcher is absent or empty");
 
-		//set and get final container
-		Container container = null;
-		
-		try {
-			container = (Container) cl.newInstance();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-			System.exit(0);
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
-		
-		if(container==null)
-			System.exit(0);
 
-		return container;
+        Class<?> cl = Class.forName(path);
+        Object inst = cl.newInstance();
+        if (inst instanceof GamePanel panel)
+            return panel;
 
-	}
+        return null;
+    }
 }

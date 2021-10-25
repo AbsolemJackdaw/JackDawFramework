@@ -7,6 +7,8 @@ import framework.GameStateHandler;
 import framework.resourceLoaders.ImageLoader;
 import framework.resourceLoaders.Music;
 
+import java.awt.*;
+
 /**
  * A class that handles background loading. 
  * 
@@ -21,6 +23,11 @@ public class LoadState extends GameState {
 	public LoadState(GameStateHandler gsh) {
 		super(gsh);
 		loadResourcesInSwingWorker();
+	}
+
+	@Override
+	public void draw(Graphics2D g) {
+
 	}
 
 	/**

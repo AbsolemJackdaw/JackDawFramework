@@ -1,118 +1,114 @@
 package framework;
 
 
-import java.awt.Graphics2D;
+import framework.gamestate.GameStateIntro;
+import framework.input.MouseHandler;
+import framework.resourceLoaders.exceptions.StateExistsException;
+import framework.resourceLoaders.exceptions.StateNotFoundException;
+
+import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
-import framework.gamestate.GameStateIntro;
-import framework.input.MouseHandler;
-
 public class GameStateHandler {
 
-	public int currentGameState = 0;
+    public static final String GAME_STATE_FRAMEWORK_INTRO = "introframework";
+    private static HashMap<String, Class<? extends GameState>> gameStates;
+    public String currentGameStateName = "";
+    private GameState currentGameState = null;
 
-	//	public static GameState[] states;
+    public GameStateHandler() {
 
-	private static HashMap<Integer, Class<? extends GameState>> thestates;
-	private GameState theCurrentState = null; 
+        gameStates = new HashMap<>();
 
-	public GameStateHandler() {
+        addGameState(GameStateIntro.class, GAME_STATE_FRAMEWORK_INTRO);
+        changeGameState(GAME_STATE_FRAMEWORK_INTRO);
+    }
 
-		//		states = new GameState[totalGameStates()];
-		thestates = new HashMap<Integer, Class<? extends GameState>>();
+    /**
+     * @return returns the index of the current loaded gamestate
+     */
+    public String getCurrentStateIndex() {
+        return currentGameStateName;
+    }
 
-		addGameState(GameStateIntro.class, -128);
-		changeGameState(-128);
-	}
+    /**
+     * @return returns the currently loaded, updating and drawing gamestate
+     */
+    public GameState getCurrentGameStateName() {
+        return currentGameState;
+    }
 
-	/**@return returns the index of the current loaded gamestate*/
-	public int getCurrentStateIndex() {
-		return currentGameState;
-	}
+    public void draw(Graphics2D g) {
 
-	/**@return returns the currently loaded, updating and drawing gamestate*/
-	public GameState getCurrentGameState(){
-		return theCurrentState;
-	}
+        if (currentGameState != null)
+            currentGameState.draw(g);
+    }
 
-	public void draw(Graphics2D g) {
-		//		states[currentGameState].draw(g);
+    public void update() {
 
-		if(theCurrentState != null)
-			theCurrentState.draw(g);
-	}
+        if (currentGameState != null)
+            currentGameState.update();
+    }
 
-	public void update() {
-		//		states[currentGameState].update();
+    /**
+     * sets previous state to null and gets a new instance for the given game state index
+     *
+     * @param state : the index fo the gamestate to be loaded
+     */
+    public void changeGameState(String state) {
+        MouseHandler.clicked = null;
 
-		if(theCurrentState != null)
-			theCurrentState.update();
-	}
+        unloadState();
+        try {
+            loadState(state);
+        } catch (StateNotFoundException e) {
+            System.err.println(e.getMessage());
+            System.exit(0);
+        }
+        currentGameStateName = state;
 
-	/**
-	 * sets previous state to null and gets a new instance for the given game state index
-	 * @param state : the index fo the gamestate to be loaded
-	 * */
-	public void changeGameState(int state) {
-		MouseHandler.clicked = null;
+    }
 
-		unloadState(currentGameState);
-		currentGameState = state;
-		loadState(state);
-	}
+    private void unloadState() {
+        currentGameState = null;
+    }
 
-	private void unloadState(int state){
-		//		states[state] = null;
-		theCurrentState  = null;
-	}
+    private void loadState(String state) throws StateNotFoundException {
 
-	private void loadState(int state){
-		Class<? extends GameState> cgs  = thestates.get(currentGameState);
-		GameState gs = null;
+        if (!gameStates.containsKey(state))
+            throw new StateNotFoundException("No Such State found !! > " + state);
 
-		try {
-			gs = cgs.getConstructor(GameStateHandler.class).newInstance(this);
-		} catch (
-				InstantiationException |
-				IllegalAccessException |
-				IllegalArgumentException |
-				InvocationTargetException |
-				NoSuchMethodException |
-				SecurityException e) {
+        Class<? extends GameState> cgs = gameStates.get(state);
 
-			e.printStackTrace();
-		}
+        try {
+            currentGameState = cgs.getConstructor(GameStateHandler.class).newInstance(this);
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+            System.err.println(e.getMessage());
+        }
 
-		if(gs == null){
-			System.out.println("fatal error. the gamestate for " + state + " was unexistent !");
-			System.exit(0);
-		}
+        if (currentGameState == null) {
+            throw new NullPointerException("fatal error. the gamestate for " + state + " was none existent !");
+        }
+    }
 
-		theCurrentState = gs;
-	}
+    /**
+     * adds a GameState instance to the pool of gamestate instances
+     *
+     * @param myGameState : the class that extends gamestate and should be registered
+     * @param uniqueID    : the unique identifier it should be registered with
+     */
 
-	/**
-	 * adds a GameState instance to the pool of gamestate instances
-	 * @param myGameState : the class that extends gamestate and should be registered
-	 * @param index : the unique identifier it should be registered with*/
-	
-	protected void addGameState(Class<? extends GameState> myGameState, int index){
+    protected void addGameState(Class<? extends GameState> myGameState, String uniqueID) {
+        if (uniqueID == null || uniqueID.isEmpty() || myGameState == null)
+            throw new NullPointerException("cannot register absent values for gamestates");
 
-		if(!thestates.containsKey(index) && !thestates.containsValue(myGameState))
-			thestates.put(index, myGameState);
+        if (gameStates.containsKey(uniqueID))
+            throw new StateExistsException(uniqueID + " was already assigned to " + gameStates.get(uniqueID).getName());
 
-		else if (thestates.containsKey(index)){
-			System.out.println("You tried registereding " + index + " for " + myGameState.getName());
+//        if (gameStates.containsValue(myGameState))
+//            throw new StateExistsException("an instance for this game state already exists.");
 
-			System.out.println("But the game state for index "+index+
-					" wasn't registered because it was already registered for "+
-					thestates.get(index).getName());
-		}
-		else if (thestates.containsValue(myGameState)){
-			System.out.println("The gamestate " + myGameState + "was skipped because it was already registered.");
-			System.out.println("Gamestates should be registered only once !");
-			
-		}
-	}
+        gameStates.put(uniqueID, myGameState);
+    }
 }

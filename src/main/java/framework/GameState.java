@@ -1,15 +1,17 @@
 package framework;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 
 public abstract class GameState {
 
-	protected GameStateHandler gsh;
+    public static final String FIRST_SCREEN = "first_screen";
+    protected GameStateHandler gsh;
 
-	public GameState(GameStateHandler gsh){this.gsh = gsh;};
-		
-	public void draw (Graphics2D g){};
+    public GameState(GameStateHandler gsh) {
+        this.gsh = gsh;
+    }
 
-	public void update(){};
+    public abstract void draw(Graphics2D g);
 
+    public abstract void update();
 }

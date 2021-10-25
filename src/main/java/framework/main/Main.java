@@ -1,48 +1,58 @@
 package framework.main;
 
-import java.awt.Container;
-
-import javax.swing.JFrame;
-
+import framework.resourceLoaders.ResourceLocation;
 import framework.window.Window;
 
-public class Main{
+import javax.swing.*;
+import java.awt.*;
 
-	public static Container gamepanel;
-	public static String mousePath = "";
+public class Main {
 
-	public static void main(String[] args) {
-		
-		String flagString = args[0];
-		boolean flag = Boolean.parseBoolean(flagString);
-		System.out.println("fullscreen flag is " + flag);
+    public static Container gamepanel;
+    public static ResourceLocation mousePath;
 
-		boolean fullScreen = flag;
-		
-		mousePath = args[3];
-		
-		new Window(fullScreen);
+    public static void main(String[] args) {
 
-		JFrame frame = new JFrame(args[1]);
+        String flagString = args[0];
+        boolean flag = Boolean.parseBoolean(flagString);
+        System.out.println("fullscreen flag is " + flag);
 
-		gamepanel = ContainerInstantator.getContainerClassFor(args[2]);
-		frame.setContentPane(gamepanel);
+        boolean fullScreen = flag;
 
-		//set size before relative location, or it wont be centered
-		frame.setResizable(false);
+        String mouseString = args[3];
+        if (mouseString != null && !mouseString.isEmpty())
+            mousePath = new ResourceLocation(mouseString);
 
-		frame.requestFocusInWindow();
+        new Window(fullScreen);
 
-		if(fullScreen){
-			//fullscreen without borders
-			frame.setUndecorated(true);
-			//fullscreen
-			frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		}
+        JFrame frame = new JFrame(args[1]);
 
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.pack();
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
-	}
+        try {
+            gamepanel = ContainerInstantator.getContainerClassFor(args[2]);
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            System.err.println("Error occured when reading GamePanel from arguments of launcher.");
+            System.err.println(e.getMessage() + " does not seem to exist");
+
+            System.exit(0);
+        }
+
+        frame.setContentPane(gamepanel);
+
+        //set size before relative location, or it wont be centered
+        frame.setResizable(false);
+
+        frame.requestFocusInWindow();
+
+        if (fullScreen) {
+            //fullscreen without borders
+            frame.setUndecorated(true);
+            //fullscreen
+            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        }
+
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
 }

@@ -45,82 +45,78 @@ public class StreamMusic {
 
 	private static Runnable runStreaming(String path){
 
-		Runnable runner = new Runnable() {
+		Runnable runner = () -> {
+			final AudioFormat baseFormat;
+			final AudioFormat decodeFormat;
+			final AudioInputStream dais;
+			SourceDataLine.Info info;
 
-			@Override
-			public void run() {
-				final AudioFormat baseFormat;
-				final AudioFormat decodeFormat;
-				final AudioInputStream dais;
-				SourceDataLine.Info info;
+			try {
+				//get audio input
+				AudioInputStream ais;
+				ais = AudioSystem.getAudioInputStream(StreamMusic.class.getResourceAsStream(path));
+				//get audioformat for inputstream
+				baseFormat = ais.getFormat();
+				//make pcm format
+				decodeFormat = new AudioFormat(
+						AudioFormat.Encoding.PCM_SIGNED,
+						baseFormat.getSampleRate(),
+						16,
+						baseFormat.getChannels(),
+						baseFormat.getChannels() * 2,
+						baseFormat.getSampleRate(),
+						true); //big endian
 
-				try {
-					//get audio input
-					AudioInputStream ais;
-					ais = AudioSystem.getAudioInputStream(StreamMusic.class.getResourceAsStream(path));
-					//get audioformat for inputstream
-					baseFormat = ais.getFormat();
-					//make pcm format
-					decodeFormat = new AudioFormat(
-							AudioFormat.Encoding.PCM_SIGNED,
-							baseFormat.getSampleRate(), 
-							16, 
-							baseFormat.getChannels(),
-							baseFormat.getChannels() * 2, 
-							baseFormat.getSampleRate(),
-							true); //big endian
+				//convert audio
+				dais = AudioSystem.getAudioInputStream(
+						decodeFormat, ais);
 
-					//convert audio
-					dais = AudioSystem.getAudioInputStream(
-							decodeFormat, ais);
+				//checking for a supported output line
+				info = new DataLine.Info(
+						SourceDataLine.class,
+						dais.getFormat(),
+						((int) dais.getFrameLength() * decodeFormat.getFrameSize()));
 
-					//checking for a supported output line
-					info = new DataLine.Info(
-							SourceDataLine.class,
-							dais.getFormat(),
-							((int) dais.getFrameLength() * decodeFormat.getFrameSize()));
+				if (!AudioSystem.isLineSupported(info)) {
+					System.out.println("Line matching " + info + " is not supported. " + path);
+					return;
+				}
 
-					if (!AudioSystem.isLineSupported(info)) {
-						System.out.println("Line matching " + info + " is not supported. " + path);
-						return;
-					}
+				//opening the sound output line
+				SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
+				line.open(dais.getFormat());
+				line.start();
 
-					//opening the sound output line
-					SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
-					line.open(dais.getFormat());
-					line.start();
+				int numRead = 0;
+				byte[] buf =  new byte[1100]; //new byte[line.getBufferSize()];
 
-					int numRead = 0;
-					byte[] buf =  new byte[1100]; //new byte[line.getBufferSize()];
-
-					while ((numRead = dais.read(buf, 0, buf.length)) >= 0) {
-						if(shouldEnd.containsKey(path) && shouldEnd.get(path)){
-							line.drain();
-							line.stop();
-							shouldEnd.remove(path);
-							shouldLoop.remove(path);
-							return;
-						}
-						int offset = 0;
-						while (offset < numRead) {
-							offset += line.write(buf, offset, numRead - offset);
-						}
-					}
-					line.drain();
-					line.stop();
-
-				} catch (Exception e) {
-					e.printStackTrace();
-				}finally{
-					//replay if looped
-					if(shouldLoop.containsKey(path) && shouldLoop.get(path)){
-						runStreaming(path);
-					}else{
+				while ((numRead = dais.read(buf, 0, buf.length)) >= 0) {
+					if(shouldEnd.containsKey(path) && shouldEnd.get(path)){
+						line.drain();
+						line.stop();
 						shouldEnd.remove(path);
 						shouldLoop.remove(path);
+						return;
 					}
-					//end of thread;
+					int offset = 0;
+					while (offset < numRead) {
+						offset += line.write(buf, offset, numRead - offset);
+					}
 				}
+				line.drain();
+				line.stop();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}finally{
+				//replay if looped
+				if(shouldLoop.containsKey(path) && shouldLoop.get(path)){
+					runStreaming(path);
+				}else{
+					shouldEnd.remove(path);
+					shouldLoop.remove(path);
+				}
+				//end of thread;
 			}
 		};
 

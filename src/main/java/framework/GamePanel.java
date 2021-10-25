@@ -1,14 +1,6 @@
 package framework;
 
 
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
-
 import framework.input.KeyHandler;
 import framework.input.MouseHandler;
 import framework.main.Main;
@@ -16,164 +8,163 @@ import framework.resourceLoaders.ImageLoader;
 import framework.window.Window;
 import javafx.embed.swing.JFXPanel;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
+
 @SuppressWarnings("serial")
-public class GamePanel extends JFXPanel implements Runnable{
+public class GamePanel extends JFXPanel implements Runnable {
 
-	private int W = Window.getWidth();
-	private int H = Window.getHeight();
+    public static GamePanel INSTANCE;
+    private final int WINDOW_WIDTH = Window.getWidth();
+    private final int WINDOW_HEIGHT = Window.getHeight();
+    // image to get graphics from
+    protected BufferedImage screen_canvas;
+    protected Graphics2D graphics2D;
+    // game thread
+    private Thread thread;
+    private boolean running;
+    private GameStateHandler gameStateHandler;
 
-	// game thread
-	private Thread thread;
-	private boolean running;
+    public GamePanel() {
+        INSTANCE = this;
 
-	// image to get graphics from
-	protected BufferedImage image;
-	protected Graphics2D g;
+        setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
+        setFocusable(true);
+        requestFocus();
 
-	private GameStateHandler ghs;
+        if (Main.mousePath != null) {
+            System.out.println("custom mouse was set. path for mouse image is " + Main.mousePath);
+            Cursor customCursor = Toolkit.getDefaultToolkit().createCustomCursor(
+                    ImageLoader.loadSprite(Main.mousePath), new Point(0, 0), "game cursor");
+            setCursor(customCursor);
+        }
 
-	public static GamePanel instance;
+        System.out.println("GamePanel : Initializing game");
+    }
 
-	public GamePanel() {
-		instance = this;
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        if (thread == null) {
 
-		setPreferredSize(new Dimension(W, H));
-		setFocusable(true);
-		requestFocus();
+            MouseHandler mh = new MouseHandler();
+            KeyHandler kh = new KeyHandler();
 
-		if(Main.mousePath.length() > 0)
-		{
-			System.out.println("custom mouse was set. path for mouse image is " + Main.mousePath);
-			Cursor samCursor = Toolkit.getDefaultToolkit().createCustomCursor(
-					ImageLoader.loadSprite(Main.mousePath), new Point(0, 0), "game cursor");
-			setCursor(samCursor);
-		}
-		
-		System.out.println("GamePanel : Initializing game");
-	}
+            thread = new Thread(this);
 
-	@Override
-	public void addNotify() {
-		super.addNotify();
-		if (thread == null) {
-			
-			MouseHandler mh = new MouseHandler();
-			KeyHandler kh = new KeyHandler();
-			
-			thread = new Thread(this);
-			
-			addKeyListener(kh);
-			addMouseListener(mh);
-			addMouseWheelListener(mh);
-			
-			thread.start();
-		}
-	}
+            addKeyListener(kh);
+            addMouseListener(mh);
+            addMouseWheelListener(mh);
 
-	@Override
-	public void run() {
-		init();
-		runGameLoop();
-	}
+            thread.start();
+        }
+    }
 
-	/**finishes drawing cycle*/
-	private void drawToScreen() {
-		Graphics g2 = getGraphics();
-		g2.drawImage(image, 0, 0, W, H, null);
-		g2.dispose();
-	}
+    @Override
+    public void run() {
+        init();
+        runGameLoop();
+    }
 
-	/**draws the current gamestate to the screen */
-	protected void draw() {
-		ghs.draw(g);
-	}
+    /**
+     * finishes drawing cycle
+     */
+    private void drawToScreen() {
+        Graphics g2 = getGraphics();
+        g2.drawImage(screen_canvas, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, null);
+        g2.dispose();
+    }
 
-	/**runs an update of the gamestate, keyhandler, and then mouse. in that order.*/
-	protected void update() {
-		ghs.update();
-		KeyHandler.update();
-		MouseHandler.update();
-	}
+    /**
+     * draws the current gamestate to the screen
+     */
+    protected void draw() {
+        gameStateHandler.draw(graphics2D);
+    }
 
-	private void init() {
+    /**
+     * runs an update of the gamestate, keyhandler, and then mouse. in that order.
+     */
+    protected void update() {
+        gameStateHandler.update();
+        KeyHandler.update();
+        MouseHandler.update();
+    }
 
-		System.out.println("launching...");
+    private void init() {
 
-		image = new BufferedImage(W, H, BufferedImage.TYPE_INT_RGB);
-		g = (Graphics2D) image.getGraphics();
+        System.out.println("launching...");
 
-		running = true;
+        screen_canvas = new BufferedImage(WINDOW_WIDTH, WINDOW_HEIGHT, BufferedImage.TYPE_INT_RGB);
+        graphics2D = (Graphics2D) screen_canvas.getGraphics();
 
-		ghs = getCustomGameStateHandler();
-	}
-	
-	/**this needs to be absolutely overridden and given your class that extends {@link GameStateHandler}*/
-	public GameStateHandler getCustomGameStateHandler(){
-		return new GameStateHandler();
-	}
+        running = true;
 
-	private void runGameLoop() {
-		//Best Update System I found on the net !
-		//http://entropyinteractive.com/2011/02/game-engine-design-the-game-loop/
-		//thanksx1000 to this dude, as well as cuddos
+        gameStateHandler = getCustomGameStateHandler();
+    }
 
-		// convert the time to seconds
-		double lastTime = (double)System.nanoTime() / 1000000000.0;
-		double maxTimeDiff = 0.5;
-		int skippedFrames = 1;
-		int maxSkippedFrames = 5;
-		double targetUpdates = 1.0/60.0;
+    /**
+     * this needs to be absolutely overridden and given your class that extends {@link GameStateHandler}
+     */
+    public GameStateHandler getCustomGameStateHandler() {
+        return new GameStateHandler();
+    }
 
-		//		int updates = 0;
-		//		int frames = 0;
-		//		long timer = System.currentTimeMillis();
+    private void runGameLoop() {
+        //Best Update System I found on the net !
+        //http://entropyinteractive.com/2011/02/game-engine-design-the-game-loop/
+        //thanksx1000 to this dude, as well as cuddos
 
-		while(running)
-		{
-			// convert the time to seconds
-			double currTime = (double)System.nanoTime() / 1000000000.0;
+        // convert the time to seconds
+        double lastTime = (double) System.nanoTime() / 1_000_000_000.0;
+        double maxTimeDiff = 0.5;
+        int skippedFrames = 1;
+        int maxSkippedFrames = 5;
+        double targetUpdates = 1.0 / 60.0;
 
-			if((currTime - lastTime) > maxTimeDiff)
-				lastTime = currTime;
+        while (running) {
+            // convert the time to seconds
+            double currTime = (double) System.nanoTime() / 1_000_000_000.0;
 
-			if(currTime >= lastTime){
+            if ((currTime - lastTime) > maxTimeDiff)
+                lastTime = currTime;
 
-				// assign the time for the next update
-				lastTime += targetUpdates;
-				update();
-				//				updates++;
+            if (currTime >= lastTime) {
 
-				if((currTime < lastTime) || (skippedFrames > maxSkippedFrames)){
+                // assign the time for the next update
+                lastTime += targetUpdates;
+                update();
+                //				updates++;
 
-					draw();
-					drawToScreen();
-					skippedFrames = 1;
-					//					frames++;
-				}
-				else
-					skippedFrames++;
-			}else{
-				// calculate the time to sleep
-				int sleepTime = (int)(1000.0 * (lastTime - currTime));
+                if ((currTime < lastTime) || (skippedFrames > maxSkippedFrames)) {
 
-				// sanity check
-				if(sleepTime > 0)
-				{
-					// sleep until the next update
-					try{
-						Thread.sleep(sleepTime);
-					}catch(InterruptedException e){
-					}
-				}
-			}
+                    draw();
+                    drawToScreen();
+                    skippedFrames = 1;
+                    //					frames++;
+                } else
+                    skippedFrames++;
+            } else {
+                // calculate the time to sleep
+                int sleepTime = (int) (1000.0 * (lastTime - currTime));
 
-			//			if(System.currentTimeMillis() - timer > 1000) {
-			//				timer += 1000;
-			////				System.out.println(updates + " Ticks, Fps " + frames);
-			//				updates = 0;
-			//				frames = 0;
-			//
-			//			}
-		}
-	}
+                // sanity check
+                if (sleepTime > 0) {
+                    // sleep until the next update
+                    try {
+                        Thread.sleep(sleepTime);
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+
+            //			if(System.currentTimeMillis() - timer > 1000) {
+            //				timer += 1000;
+            ////				System.out.println(updates + " Ticks, Fps " + frames);
+            //				updates = 0;
+            //				frames = 0;
+            //
+            //			}
+        }
+    }
 }
