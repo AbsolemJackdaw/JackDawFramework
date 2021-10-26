@@ -8,7 +8,7 @@ please read trough all instructions at least one before starting anything.
 if all is followed step by step, you should be able to have a JavaFX project with the jacdaw framework ready in no time.
 
 ### download : 
- - json library : https://github.com/stleary/JSON-java
+ - json library : https://github.com/stleary/JSON-java (scroll a bit down, in the readme, there's a download link for the latest release)
  - javafx sdk : https://gluonhq.com/products/javafx/
  - this framework as a library : https://github.com/ArtixAllMighty/JackDawFramework/releases/download/JDF_2.0_1.0.0.0/JackdawFramework_2.0-1.0.0.0.jar
  
