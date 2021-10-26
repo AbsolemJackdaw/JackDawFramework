@@ -4,6 +4,9 @@ Amateur framework with which I work to make 2d javafx and swing based games.
 
 ## Instructions
 
+please read trough all instructions at least one before starting anything.
+if all is followed step by step, you should be able to have a JavaFX project with the jacdaw framework ready in no time.
+
 ### download : 
  - json library : https://github.com/stleary/JSON-java
  - javafx sdk : https://gluonhq.com/products/javafx/
@@ -15,6 +18,7 @@ Amateur framework with which I work to make 2d javafx and swing based games.
   - add javafx lib folder as library
   - add json jar as library
   - add framework jar as library
+> adding a library : go to file > project structure > library > click the +, pick java option, > navigate to jar or folder you want to add.
 
 ### get started with the framework
   - make one class extending GameStateHandler
