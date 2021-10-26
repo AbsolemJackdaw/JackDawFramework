@@ -7,7 +7,7 @@ Amateur framework with which I work to make 2d javafx and swing based games.
 ### download : 
  - json library : https://github.com/stleary/JSON-java
  - javafx sdk : https://gluonhq.com/products/javafx/
- - this framework as a library
+ - this framework as a library : https://github.com/ArtixAllMighty/JackDawFramework/releases/download/JDF_2.0_1.0.0.0/JackdawFramework_2.0-1.0.0.0.jar
  
 ### instructions
   - start javafx project in intellij
